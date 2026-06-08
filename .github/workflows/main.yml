@@ -13,10 +13,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Theos Environment
-        uses: theos/setup-theos-action@v1
+      - name: Setup Theos and iOS SDK
+        uses: zzanehip/setup-theos-action@v1
         with:
-          archs: 'arm64 arm64e'
           sdk: 'iphoneos16.5'
 
       - name: Build Package
