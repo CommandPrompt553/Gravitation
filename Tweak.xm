@@ -308,40 +308,20 @@ void toggleAnimations()
 //
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-
-#define kIdentifier @"me.kritanta.gravitationprefs"
-#define kSettingsChangedNotification (CFStringRef)@"me.kritanta.gravitationprefs/Prefs"
 #define kSettingsPath @"/var/mobile/Library/Preferences/me.kritanta.gravitationprefs.plist"
 
 static void *observer = NULL;
 
-static void reloadPrefs()
-{
-    if ([NSHomeDirectory()isEqualToString:@"/var/mobile"])
-    {
-        CFArrayRef keyList = CFPreferencesCopyKeyList((CFStringRef)kIdentifier, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-
-        if (keyList)
-        {
-            prefs = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, (CFStringRef)kIdentifier, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
-
-            if (!prefs)
-            {
-                prefs = [NSDictionary new];
-            }
-            CFRelease(keyList);
-        }
-    } 
-    else 
-    {
-        prefs = [NSDictionary dictionaryWithContentsOfFile:kSettingsPath];
-    }
-}
-
 static void preferencesChanged()
 {
-    CFPreferencesAppSynchronize((CFStringRef)kIdentifier);
-    reloadPrefs();
+    // Wir laden die plist-Datei direkt als Dictionary aus dem Dateisystem.
+    // Das umgeht den abstürzenden CFPreferences-Dienst von iOS 16 komplett!
+    prefs = [NSDictionary dictionaryWithContentsOfFile:kSettingsPath];
+
+    if (!prefs)
+    {
+        prefs = [NSDictionary new];
+    }
 
     _pfTweakEnabled = [prefs objectForKey:@"tweakEnabled"] ? [[prefs valueForKey:@"tweakEnabled"] boolValue] : YES;
     _pfFingerGravityEnabled = [prefs objectForKey:@"fingerGravity"] ? [[prefs valueForKey:@"fingerGravity"] boolValue] : YES;
@@ -363,4 +343,3 @@ static void preferencesChanged()
 
     NSLog(@"Gravitation: Initialized");
 }
-
