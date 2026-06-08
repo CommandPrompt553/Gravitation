@@ -1,0 +1,32 @@
+name: Build Rootless Tweak
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Theos Environment
+        uses: theos/setup-theos-action@v1
+        with:
+          archs: 'arm64 arm64e'
+          sdk: 'iphoneos16.5'
+
+      - name: Build Package
+        run: |
+          make package FINALPACKAGE=1
+        env:
+          THEOS: ${{ env.THEOS }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gravitation-Rootless-Deb
+          path: packages/*.deb
